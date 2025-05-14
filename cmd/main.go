@@ -1,18 +1,27 @@
 package main
 
 import (
-	"gin-design/internal/app"
-	"gin-design/internal/config"
+	"fmt"
+	"gin-design/internal"
 
-	"github.com/google/wire"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	cfg := config.NewConfig()
 
-	app := app.NewApp(cfg.Init())
+	// 加载 .env 文件（优先加载）
+	if err := godotenv.Load(); err != nil {
+		// 开发环境建议警告，生产环境可忽略（无 .env 文件时）
+		fmt.Println("Warning: .env file not found")
+	}
 
-	wire.StructProvider
+	app, err := internal.InitApp("dev")
+	if err != nil {
+		panic(err)
+	}
+
+	asd := make(map[string]string)
+	asd["ads"] = "ads"
 
 	app.Run()
 }

@@ -1,0 +1,41 @@
+# scripts/docker-compose.prod.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    environment:
+      - ENV=prod
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=secret
+      - REDIS_ADDR=redis:6379
+      - JWT_SECRET=prod-secret-key
+      - AES_ENCRYPTION_KEY=prod-aes-key-1234567890123456
+      - CONSUL_ADDR=consul
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+      - consul
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: prod_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2
+    command: redis-server --requirepass secret
+
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+
+volumes:
+  mysql_data:
