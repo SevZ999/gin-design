@@ -4,14 +4,15 @@
 package internal
 
 import (
-	"gin-design/internal/app/controller"
-	"gin-design/internal/app/repo"
-	"gin-design/internal/app/router"
-	"gin-design/internal/app/service"
-	"gin-design/internal/config"
-	"gin-design/internal/db"
-	"gin-design/internal/pkg/logger"
+	"loan-admin/internal/app/controller"
+	"loan-admin/internal/app/repo"
+	"loan-admin/internal/app/router"
+	"loan-admin/internal/app/service"
+	"loan-admin/internal/config"
+	"loan-admin/internal/db"
+	"loan-admin/internal/pkg/logger"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
@@ -30,9 +31,17 @@ func NewApp(routers []router.Router) *App {
 
 func (a *App) Run() {
 
-	api := gin.Default().Group("/api")
+	api := a.Engine.Group("api")
 
 	a.SetRoute(api)
+
+	a.Engine.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	pprof.Register(a.Engine, "/api/pprof")
 
 	a.Engine.Run(":9001")
 }

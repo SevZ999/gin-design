@@ -3,8 +3,8 @@ package consul
 
 import (
 	"fmt"
-	"gin-design/internal/config"
-	"gin-design/internal/pkg/logger"
+	"loan-admin/internal/config"
+	"loan-admin/internal/pkg/logger"
 
 	"github.com/hashicorp/consul/api"
 	"go.uber.org/zap"

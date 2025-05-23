@@ -1,0 +1,54 @@
+
+services:
+  admin:
+    image: loan-admin
+    ports:
+      - "9001:9001"
+    labels:
+      # 路由规则（按需修改域名）
+      - "traefik.enable=true"
+      - "traefik.http.routers.loan-admin.rule=Host(`sevz999.cn`) && PathPrefix(`/admin/api`)"
+      # 入口点配置（根据实际Traefik配置调整）
+      - "traefik.http.routers.loan-admin.entrypoints=websecure"
+      - "traefik.http.routers.loan-admin.tls=true"
+      # TLS 证书配置（需与Traefik的certresolver匹配）
+      # - "traefik.http.routers.app.tls.certresolver=myresolver"
+      # 服务端口映射
+      - "traefik.http.services.loan-admin.loadbalancer.server.port=9001"
+      # 健康检查配置（可选）
+      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.path=/health"
+      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.interval=10s"
+      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.timeout=3s"
+
+      
+
+      # # 安全头部可以用来增强应用的安全性，比如 HSTS、XSS 防护等
+      - "traefik.http.middlewares.testHeader.headers.framedeny=true"
+      - "traefik.http.middlewares.testHeader.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.testHeader.headers.accessControlAllowHeaders=Authorization"
+
+      # 删除路径
+      - "traefik.http.middlewares.strip.stripprefix.prefixes=/admin"
+
+      # 限制请求速率
+      - "traefik.http.middlewares.test-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.test-ratelimit.ratelimit.burst=1"
+
+      # # - "traefik.http.routers.loan-admin.middlewares=my-plugins@file"
+
+      # # 指定中间件链
+      - "traefik.http.routers.loan-admin.middlewares=test-ratelimit,testHeader,strip"
+      # - "traefik.http.middlewares.secured.chain.middlewares=testHeader"
+      # - "traefik.http.routers.loan-admin.middlewares=secured"
+    env_file:
+      # 如果需要环境变量配置
+      - ./.env
+    volumes:
+      # 如果需要挂载本地配置（开发环境推荐）
+      - ./config/config.dev.yaml:/app/config/config.dev.yaml
+    networks:
+      - traefik_net
+
+networks:
+  traefik_net:
+    external: true  # 确保已存在该网络

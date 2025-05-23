@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"gin-design/internal/app/service"
+	"loan-admin/internal/app/service"
 
 	"github.com/google/wire"
 )
@@ -9,4 +9,7 @@ import (
 var RepoProviderSet = wire.NewSet(
 	NewUserRepo,
 	wire.Bind(new(service.UserRepo), new(*UserRepo)),
+
+	NewAccessRepo,
+	wire.Bind(new(service.AccessRepo), new(*AcessRepo)),
 )

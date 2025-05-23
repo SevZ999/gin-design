@@ -11,12 +11,15 @@ type Router interface {
 
 var RouterProviderSet = wire.NewSet(
 	NewUserRouter,
+	NewAccessRouter,
 )
 
 func NewRouters(
 	user *UserRouter,
+	access *AccessRouter,
 ) []Router {
 	return []Router{
 		user,
+		access,
 	}
 }

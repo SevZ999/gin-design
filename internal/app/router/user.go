@@ -1,7 +1,7 @@
 package router
 
 import (
-	"gin-design/internal/app/controller"
+	"loan-admin/internal/app/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,5 +17,12 @@ func NewUserRouter(ctrl *controller.UserController) *UserRouter {
 }
 
 func (r *UserRouter) SetRoute(router *gin.RouterGroup) {
-	router.GET("/user/:id", r.ctrl.GetUser)
+	api := router.Group("/user")
+
+	api.POST("/login", r.ctrl.Login)
+
+	api.GET("", r.ctrl.GetUser)
+
+	api.GET("check", r.ctrl.Check)
+
 }

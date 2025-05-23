@@ -2,7 +2,7 @@
 package logger
 
 import (
-	"gin-design/internal/config"
+	"loan-admin/internal/config"
 	"os"
 
 	"go.uber.org/zap"

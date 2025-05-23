@@ -1,0 +1,12 @@
+# 排除开发环境文件
+.git
+.gitignore
+.idea
+.vscode
+log/
+tmp/
+test/
+
+# 排除本地配置
+.env
+.env.*

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gin-design/internal"
+	"loan-admin/internal"
+	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -15,13 +17,18 @@ func main() {
 		fmt.Println("Warning: .env file not found")
 	}
 
+	// 加载 .env 文件（优先加载）
+	name, ok := os.LookupEnv(gin.EnvGinMode)
+	if ok {
+		gin.SetMode(name)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
 	app, err := internal.InitApp("dev")
 	if err != nil {
 		panic(err)
 	}
-
-	asd := make(map[string]string)
-	asd["ads"] = "ads"
 
 	app.Run()
 }

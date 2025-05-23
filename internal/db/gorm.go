@@ -3,8 +3,8 @@ package db
 
 import (
 	"fmt"
-	"gin-design/internal/config"
-	logger1 "gin-design/internal/pkg/logger"
+	"loan-admin/internal/config"
+	logger1 "loan-admin/internal/pkg/logger"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

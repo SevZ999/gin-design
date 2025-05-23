@@ -4,7 +4,7 @@ package middleware
 import (
 	"runtime/debug"
 
-	"gin-design/internal/pkg/logger"
+	"loan-admin/internal/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

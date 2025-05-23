@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"gin-design/internal/app/dto"
+	"loan-admin/internal/app/model"
 
 	"gorm.io/gorm"
 )
@@ -16,8 +16,9 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 	}
 }
 
-func (r *UserRepo) GetUser(id int) (dto.GetUserResp, error) {
-	var user dto.GetUserResp
-	err := r.db.Table("users").Where("id = ?", id).First(&user).Error
-	return user, err
+func (r *UserRepo) GetUser(id int) (model.User, error) {
+	return model.User{
+		Id:   id,
+		Name: "test",
+	}, nil
 }
