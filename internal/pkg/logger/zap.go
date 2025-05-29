@@ -80,7 +80,7 @@ func NewZapLogger(cfg *config.Config) (*Logger, error) {
 	logger := zap.New(
 		combinedCore,
 		zap.AddCaller(),
-		zap.AddStacktrace(zapcore.ErrorLevel),
+		zap.AddStacktrace(zapcore.PanicLevel),
 		zap.Development(),
 	)
 
@@ -102,4 +102,8 @@ func getLogLevel(level string) zapcore.Level {
 	default:
 		return zap.InfoLevel
 	}
+}
+
+func Log() *zap.Logger {
+	return zap.L()
 }

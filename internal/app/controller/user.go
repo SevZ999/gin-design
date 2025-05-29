@@ -3,8 +3,10 @@ package controller
 import (
 	"loan-admin/internal/app/dto"
 	"loan-admin/internal/app/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type UserController struct {
@@ -29,13 +31,31 @@ func (ctrl *UserController) Check(c *gin.Context) {
 	))
 }
 
+// @Summary 获取用户信息
+// @Description 获取用户信息
+// @Tags 用户管理
+// @Accept json
+// @Produce json
+// @Param id path int true "用户ID"
+// @Success 200 {object} dto.GetUserResp
+// @Failure 400 {string} string "无效请求"
+// @Failure 500 {string} string "服务器错误"
+// @Router /api/user/{id} [get]
 func (ctrl *UserController) GetUser(c *gin.Context) {
-	// id, err := strconv.Atoi(c.Param("id"))
-	// if err != nil {
-	// 	c.JSON(400, dto.Error(400, "invalid id"))
-	// 	return
-	// }
-	resp, err := ctrl.srv.GetUser(1)
+
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(400, dto.Error(400, "invalid id"))
+		return
+	}
+
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(400, dto.Error(400, "invalid id"))
+		return
+	}
+
+	resp, err := ctrl.srv.GetUser(userId)
 	if err != nil {
 		c.JSON(500, dto.Error(500, err.Error()))
 		return
@@ -47,7 +67,8 @@ func (ctrl *UserController) GetUser(c *gin.Context) {
 func (ctrl *UserController) Login(c *gin.Context) {
 	var req dto.LoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, dto.Error(400, err.Error()))
+		zap.L().Sugar().Error(err)
+		c.JSON(400, dto.Error(400, "invalid request"))
 		return
 	}
 	resp, err := ctrl.srv.Login(req)

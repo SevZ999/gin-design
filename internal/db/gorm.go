@@ -9,15 +9,25 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"gorm.io/plugin/dbresolver"
 )
 
 func NewGormDB(cfg *config.Config, log *logger1.Logger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		cfg.Database.User,
-		cfg.Database.Password,
-		cfg.Database.Host,
-		cfg.Database.Port,
-		cfg.Database.Name,
+		cfg.Database.Master.User,
+		cfg.Database.Master.Password,
+		cfg.Database.Master.Host,
+		cfg.Database.Master.Port,
+		cfg.Database.Master.Name,
+	)
+
+	dsn1 := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		cfg.Database.Slave.User,
+		cfg.Database.Slave.Password,
+		cfg.Database.Slave.Host,
+		cfg.Database.Slave.Port,
+		cfg.Database.Slave.Name,
 	)
 
 	gormConfig := &gorm.Config{
@@ -25,7 +35,7 @@ func NewGormDB(cfg *config.Config, log *logger1.Logger) (*gorm.DB, error) {
 	}
 
 	if cfg.Env == "dev" {
-		gormConfig.Logger = logger.Default.LogMode(logger.Warn)
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
 	}
 
 	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
@@ -33,14 +43,21 @@ func NewGormDB(cfg *config.Config, log *logger1.Logger) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect database: %w", err)
 	}
 
+	//配置读写分离
+	db.Use(dbresolver.Register(dbresolver.Config{
+		Sources:  []gorm.Dialector{mysql.Open(dsn)},
+		Replicas: []gorm.Dialector{mysql.Open(dsn1)},
+		Policy:   dbresolver.RandomPolicy{},
+	}))
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(cfg.Database.MaxIdleConns)
-	sqlDB.SetMaxOpenConns(cfg.Database.MaxOpenConns)
-	sqlDB.SetConnMaxLifetime(cfg.Database.ConnMaxLifetime)
+	sqlDB.SetMaxIdleConns(cfg.Database.Master.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.Database.Master.MaxOpenConns)
+	sqlDB.SetConnMaxLifetime(cfg.Database.Master.ConnMaxLifetime)
 
 	return db, nil
 }

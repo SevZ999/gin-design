@@ -1,54 +1,47 @@
-
 services:
-  admin:
-    image: loan-admin
-    ports:
-      - "9001:9001"
-    labels:
-      # 路由规则（按需修改域名）
-      - "traefik.enable=true"
-      - "traefik.http.routers.loan-admin.rule=Host(`sevz999.cn`) && PathPrefix(`/admin/api`)"
-      # 入口点配置（根据实际Traefik配置调整）
-      - "traefik.http.routers.loan-admin.entrypoints=websecure"
-      - "traefik.http.routers.loan-admin.tls=true"
-      # TLS 证书配置（需与Traefik的certresolver匹配）
-      # - "traefik.http.routers.app.tls.certresolver=myresolver"
-      # 服务端口映射
-      - "traefik.http.services.loan-admin.loadbalancer.server.port=9001"
-      # 健康检查配置（可选）
-      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.path=/health"
-      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.interval=10s"
-      - "traefik.http.services.loan-admin.loadBalancer.healthcheck.timeout=3s"
-
-      
-
-      # # 安全头部可以用来增强应用的安全性，比如 HSTS、XSS 防护等
-      - "traefik.http.middlewares.testHeader.headers.framedeny=true"
-      - "traefik.http.middlewares.testHeader.headers.browserxssfilter=true"
-      - "traefik.http.middlewares.testHeader.headers.accessControlAllowHeaders=Authorization"
-
-      # 删除路径
-      - "traefik.http.middlewares.strip.stripprefix.prefixes=/admin"
-
-      # 限制请求速率
-      - "traefik.http.middlewares.test-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.test-ratelimit.ratelimit.burst=1"
-
-      # # - "traefik.http.routers.loan-admin.middlewares=my-plugins@file"
-
-      # # 指定中间件链
-      - "traefik.http.routers.loan-admin.middlewares=test-ratelimit,testHeader,strip"
-      # - "traefik.http.middlewares.secured.chain.middlewares=testHeader"
-      # - "traefik.http.routers.loan-admin.middlewares=secured"
-    env_file:
-      # 如果需要环境变量配置
-      - ./.env
+  loan-admin-v1:
+    image: loan-admin:latest  # 固定镜像版本（禁止使用latest）
+    user: "1001:1001"        # 强制指定非root用户UID/GID（与Dockerfile中创建的nonroot用户一致）
+    security_opt:
+      - no-new-privileges:true  # 禁止提权
+    cap_drop:                  # 删除所有特权能力
+      - ALL
+    read_only: true            # 文件系统只读
+    # tmpfs:                     # 允许临时目录写入
+    #   - /tmp:uid=1001,gid=1001,mode=1700  # 限制/tmp目录权限
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:                   # 🔥 日志安全配置
+      driver: json-file
+      options:
+        max-size: "10m"       # 单个日志文件最大10MB
+        max-file: "5"         # 最多保留5个历史日志
+        compress: "true"      # 启用压缩节省空间
+        labels: "prod"        # 添加日志标签方便过滤
     volumes:
-      # 如果需要挂载本地配置（开发环境推荐）
-      - ./config/config.dev.yaml:/app/config/config.dev.yaml
+      - /usr/src/dev/loan-admin/log/app:/app/logs:uid=1001,gid=1001,mode=0750
+    labels:
+      - "traefik.enable=true"
+      # 定义v1服务
+      - "traefik.http.services.loan-admin-v1.loadbalancer.server.port=9001"
+      # 健康检查
+      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.timeout=3s"
     networks:
       - traefik_net
 
+# volumes:
+#   loan-admin-logs:  # 命名卷（Docker自动管理路径）
+#     driver: local
+#     driver_opts:
+#       type: "none"
+#       o: "bind,uid=1001,gid=1001,mode=0750"
+#       device: /usr/src/dev/loan-admin/log/app  # 宿主机实际路径（可自定义）
+
 networks:
   traefik_net:
-    external: true  # 确保已存在该网络
+    external: true

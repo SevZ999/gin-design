@@ -1,18 +1,17 @@
 package repo
 
 import (
+	"loan-admin/internal/app/data"
 	"loan-admin/internal/app/dto"
-
-	"gorm.io/gorm"
 )
 
 type AcessRepo struct {
-	db *gorm.DB
+	Db *data.Data
 }
 
-func NewAccessRepo(db *gorm.DB) *AcessRepo {
+func NewAccessRepo(db *data.Data) *AcessRepo {
 	return &AcessRepo{
-		db: db,
+		Db: db,
 	}
 }
 

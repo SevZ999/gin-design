@@ -1,35 +1,33 @@
 # 第一阶段：构建阶段
 FROM golang:1.24.2-alpine AS builder
-
 WORKDIR /app
-
-# 设置国内代理加速
 ENV GOPROXY=https://goproxy.cn,direct
 
-# 预编译依赖
-COPY go.mod go.mod
-COPY go.sum go.sum
+# 预下载依赖（利用Docker缓存层）
+COPY go.mod go.sum ./
 RUN go mod download
 
-# 🔥 全量复制所有文件（注意配合.dockerignore使用）
+# 复制源码并构建
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /app/main ./cmd
 
-# 构建二进制文件（静态链接）
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd
-
-# 第二阶段：生产环境镜像
+# 第二阶段：生产镜像
 FROM alpine:latest
+
+# 创建非root用户和组，安装CA证书
+RUN addgroup -g 1001 nonroot && \
+    adduser -u 1001 -G nonroot -D nonroot && \
+    apk add --no-cache ca-certificates
 
 WORKDIR /app
 
-# 🔥 仅复制必要文件到最终镜像
-COPY --from=builder /app/main .
-COPY --from=builder /app/config/config.dev.yaml ./config/
+# 复制二进制文件和配置文件（生产环境专用）
+COPY --from=builder --chown=nonroot:nonroot /app/main .
+COPY --from=builder --chown=nonroot:nonroot /app/config/config.dev.yaml ./config/
 
-# 安装证书包（确保 TLS 连接正常）
-# RUN apk add --no-cache ca-certificates
+# 确保配置文件权限安全
+RUN chmod 640 ./config/config.dev.yaml
 
-EXPOSE 9001
-
-# 启动命令
+# 设置容器用户和启动命令
+USER nonroot:nonroot
 CMD ["./main"]

@@ -1,24 +1,37 @@
 package repo
 
 import (
+	"context"
+	"loan-admin/internal/app/data"
 	"loan-admin/internal/app/model"
-
-	"gorm.io/gorm"
 )
 
 type UserRepo struct {
-	db *gorm.DB
+	Db *data.Data
 }
 
-func NewUserRepo(db *gorm.DB) *UserRepo {
+func NewUserRepo(db *data.Data) *UserRepo {
 	return &UserRepo{
-		db: db,
+		Db: db,
 	}
 }
 
-func (r *UserRepo) GetUser(id int) (model.User, error) {
-	return model.User{
-		Id:   id,
-		Name: "test",
-	}, nil
+func (r *UserRepo) GetUser(tx context.Context, id int) (model.User, error) {
+
+	user := model.User{}
+	err := r.Db.WithContext(tx).Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
+}
+
+func (r *UserRepo) GetUserByName(tx context.Context, username string) (model.User, error) {
+
+	user := model.User{}
+	err := r.Db.WithContext(tx).Where("username = ?", username).First(&user).Error
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
 }

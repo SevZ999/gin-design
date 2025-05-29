@@ -12,7 +12,7 @@ import (
 type Config struct {
 	Env       string    `yaml:"env"`
 	HTTP      HTTP      `yaml:"http"`
-	Database  DB        `yaml:"database"`
+	Database  DBs       `yaml:"database"`
 	Redis     Redis     `yaml:"redis"`
 	Log       Log       `yaml:"log"`
 	Auth      Auth      `yaml:"auth"`
@@ -26,6 +26,11 @@ type HTTP struct {
 	Port         int           `yaml:"port"`
 	ReadTimeout  time.Duration `yaml:"read_timeout"`
 	WriteTimeout time.Duration `yaml:"write_timeout"`
+}
+
+type DBs struct {
+	Master DB `yaml:"master"`
+	Slave  DB `yaml:"slave1"`
 }
 
 type DB struct {
@@ -82,6 +87,7 @@ type Crypto struct {
 func LoadConfig(env string) (*Config, error) {
 	viper.SetConfigName(fmt.Sprintf("config.%s", env))
 	viper.SetConfigType("yaml")
+
 	viper.AddConfigPath("./config")
 
 	viper.AutomaticEnv()

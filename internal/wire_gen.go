@@ -9,13 +9,21 @@ package internal
 import (
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"loan-admin/internal/app/controller"
+	"loan-admin/internal/app/data"
 	"loan-admin/internal/app/repo"
 	"loan-admin/internal/app/router"
 	"loan-admin/internal/app/service"
 	"loan-admin/internal/config"
 	"loan-admin/internal/db"
+	"loan-admin/internal/middleware"
 	"loan-admin/internal/pkg/logger"
+)
+
+import (
+	_ "loan-admin/docs"
 )
 
 // Injectors from wire.go:
@@ -33,11 +41,12 @@ func InitApp(mode string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	userRepo := repo.NewUserRepo(gormDB)
+	dataData := data.NewData(gormDB)
+	userRepo := repo.NewUserRepo(dataData)
 	userService := service.NewUserService(userRepo)
 	userController := controller.NewUserController(userService)
 	userRouter := router.NewUserRouter(userController)
-	acessRepo := repo.NewAccessRepo(gormDB)
+	acessRepo := repo.NewAccessRepo(dataData)
 	accessService := service.NewAccessService(acessRepo)
 	accessController := controller.NewAccessController(accessService)
 	accessRouter := router.NewAccessRouter(accessController)
@@ -64,6 +73,8 @@ func (a *App) Run() {
 
 	api := a.Engine.Group("api")
 
+	api.Use(middleware.CORS())
+
 	a.SetRoute(api)
 
 	a.Engine.GET("/health", func(ctx *gin.Context) {
@@ -72,6 +83,8 @@ func (a *App) Run() {
 		})
 	})
 	pprof.Register(a.Engine, "/api/pprof")
+
+	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	a.Engine.Run(":9001")
 }

@@ -1,20 +1,25 @@
 //go:build wireinject
-// +build wireinject
 
 package internal
 
 import (
 	"loan-admin/internal/app/controller"
+	"loan-admin/internal/app/data"
 	"loan-admin/internal/app/repo"
 	"loan-admin/internal/app/router"
 	"loan-admin/internal/app/service"
 	"loan-admin/internal/config"
 	"loan-admin/internal/db"
+	"loan-admin/internal/middleware"
 	"loan-admin/internal/pkg/logger"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "loan-admin/docs"
 )
 
 type App struct {
@@ -33,6 +38,8 @@ func (a *App) Run() {
 
 	api := a.Engine.Group("api")
 
+	api.Use(middleware.CORS())
+
 	a.SetRoute(api)
 
 	a.Engine.GET("/health", func(ctx *gin.Context) {
@@ -42,6 +49,8 @@ func (a *App) Run() {
 	})
 
 	pprof.Register(a.Engine, "/api/pprof")
+
+	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	a.Engine.Run(":9001")
 }
@@ -54,6 +63,7 @@ func InitApp(mode string) (*App, error) {
 		logger.NewZapLogger,
 		db.NewGormDB,
 
+		data.NewData,
 		repo.RepoProviderSet,
 		service.ServiceProviderSet,
 		controller.ControllerProviderSet,

@@ -12,7 +12,10 @@ build:
 	docker build -t loan-admin .
 
 start:
-	docker compose up -d
+	docker-compose --compatibility up -d
 
 wire:
 	wire ./...
+
+swag:
+	swag init -g ./cmd/main.go

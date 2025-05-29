@@ -21,7 +21,7 @@ func (r *UserRouter) SetRoute(router *gin.RouterGroup) {
 
 	api.POST("/login", r.ctrl.Login)
 
-	api.GET("", r.ctrl.GetUser)
+	api.GET("/:id", r.ctrl.GetUser)
 
 	api.GET("check", r.ctrl.Check)
 
