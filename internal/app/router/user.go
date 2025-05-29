@@ -1,7 +1,7 @@
 package router
 
 import (
-	"gin-design/internal/controller"
+	"loan-admin/internal/app/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,13 +11,18 @@ type UserRouter struct {
 }
 
 func NewUserRouter(ctrl *controller.UserController) *UserRouter {
-	return &UserRouter{}
+	return &UserRouter{
+		ctrl: ctrl,
+	}
 }
 
-func (u *UserRouter) Route(r *gin.RouterGroup) {
-	r.Use()
+func (r *UserRouter) SetRoute(router *gin.RouterGroup) {
+	api := router.Group("/user")
 
-	user := r.Group("/user")
+	api.POST("/login", r.ctrl.Login)
 
-	user.GET("", u.ctrl.GetUser)
+	api.GET("/:id", r.ctrl.GetUser)
+
+	api.GET("check", r.ctrl.Check)
+
 }

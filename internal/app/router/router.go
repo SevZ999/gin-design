@@ -1,33 +1,25 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+)
 
-type Routers interface {
-	Route(*gin.RouterGroup)
+type Router interface {
+	SetRoute(router *gin.RouterGroup)
 }
 
-type router struct {
-	engine *gin.Engine
-}
+var RouterProviderSet = wire.NewSet(
+	NewUserRouter,
+	NewAccessRouter,
+)
 
-func NewRouter() *router {
-	return &router{}
-}
-
-func (r *router) Registe() {
-
-	// 初始化前缀
-	api := r.engine.Group("/api")
-
-	// 全局中间件
-	r.engine.Use(gin.Recovery())
-
-	// 注册路由
-	routers := []Routers{
-		NewUserRouter(nil),
-	}
-
-	for _, router := range routers {
-		router.Route(api)
+func NewRouters(
+	user *UserRouter,
+	access *AccessRouter,
+) []Router {
+	return []Router{
+		user,
+		access,
 	}
 }

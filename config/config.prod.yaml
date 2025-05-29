@@ -1,0 +1,44 @@
+# configs/config.prod.yaml
+env: prod
+http:
+  host: "0.0.0.0"
+  port: 9001
+  read_timeout: 10s
+  write_timeout: 10s
+database:
+  host: "${DATABASE_HOST}"
+  port: 3306
+  user: "${DATABASE_USER}"
+  password: "${DATABASE_PASSWORD}"
+  name: "loan"
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 60m
+redis:
+  addr: "${REDIS_ADDR}"
+  password: "${REDIS_PASSWORD}"
+  db: 1
+  pool_size: 50
+  timeout: 5s
+log:
+  level: info
+  encoding: json
+  output_paths: ["./log/app/app.log"]
+  error_output_paths: ["./log/app/error.log"]
+  max_size: 100
+  max_backups: 7
+  max_age: 30
+  compress: true
+auth:
+  secret_key: "${JWT_SECRET}"
+  token_expiry: 24h
+rate_limit:
+  rps: 100
+  burst: 200
+consul:
+  addr: "${CONSUL_ADDR}:8500"
+  service_id: "gin-wire-service"
+  service_name: "gin-wire"
+  check_interval: 15s
+crypto:
+  aes_key: "${AES_ENCRYPTION_KEY}"

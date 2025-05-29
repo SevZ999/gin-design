@@ -1,0 +1,53 @@
+# configs/config.dev.yaml
+env: dev
+http:
+  host: 0.0.0.0
+  port: 9001
+  read_timeout: 5s
+  write_timeout: 5s
+
+
+database:
+  master:
+    host: 124.71.206.103
+    port: 3306
+    user: root
+    password: 980508
+    name: loan
+    max_idle_conns: 2
+    max_open_conns: 10
+    conn_max_lifetime: 1h
+  slave:
+    host: 43.142.13.187
+    port: 3306
+    user: root
+    password: 980508
+    name: loan
+    max_idle_conns: 2
+    max_open_conns: 10
+    conn_max_lifetime: 1h
+
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+  pool_size: 10
+  timeout: 2s
+log:
+  level: debug
+  encoding: console
+  output_paths: [stdout]
+auth:
+  secret_key: dev-secret-key-change-me
+  token_expiry: 1h
+rate_limit:
+  rps: 10
+  burst: 20
+consul:
+  addr: ""
+  service_id: ""
+  service_name: ""
+  check_interval: 0s
+crypto:
+  aes_key: "default-aes-key-1234567890123456"
