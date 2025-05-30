@@ -17,12 +17,4 @@ func NewUserRouter(ctrl *controller.UserController) *UserRouter {
 }
 
 func (r *UserRouter) SetRoute(router *gin.RouterGroup) {
-	api := router.Group("/user")
-
-	api.POST("/login", r.ctrl.Login)
-
-	api.GET("/:id", r.ctrl.GetUser)
-
-	api.GET("check", r.ctrl.Check)
-
 }

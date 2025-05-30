@@ -13,7 +13,6 @@ import (
 	"loan-admin/internal/middleware"
 	"loan-admin/internal/pkg/logger"
 
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	swaggerFiles "github.com/swaggo/files"
@@ -48,7 +47,7 @@ func (a *App) Run() {
 		})
 	})
 
-	pprof.Register(a.Engine, "/api/pprof")
+	// pprof.Register(a.Engine, "/api/pprof")
 
 	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

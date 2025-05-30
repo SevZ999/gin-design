@@ -5,4 +5,6 @@ import "github.com/google/wire"
 var ServiceProviderSet = wire.NewSet(
 	NewUserService,
 	NewAccessService,
+	NewChannelService,
+	NewShopService,
 )

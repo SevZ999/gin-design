@@ -7,7 +7,6 @@
 package internal
 
 import (
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -50,7 +49,15 @@ func InitApp(mode string) (*App, error) {
 	accessService := service.NewAccessService(acessRepo)
 	accessController := controller.NewAccessController(accessService)
 	accessRouter := router.NewAccessRouter(accessController)
-	v := router.NewRouters(userRouter, accessRouter)
+	channelRepo := repo.NewChannelRepo(dataData)
+	channelService := service.NewChannelService(channelRepo)
+	channelController := controller.NewChannelController(channelService)
+	channelRouter := router.NewChannelRouter(channelController)
+	shopRepo := repo.NewShopRepo(dataData)
+	shopService := service.NewShopService(shopRepo)
+	shopController := controller.NewShopController(shopService)
+	shopRouter := router.NewShopRouter(shopController)
+	v := router.NewRouters(userRouter, accessRouter, channelRouter, shopRouter)
 	app := NewApp(v)
 	return app, nil
 }
@@ -82,7 +89,6 @@ func (a *App) Run() {
 			"message": "pong",
 		})
 	})
-	pprof.Register(a.Engine, "/api/pprof")
 
 	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
