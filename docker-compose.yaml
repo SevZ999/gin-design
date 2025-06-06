@@ -1,6 +1,6 @@
 services:
-  loan-admin-v1:
-    image: loan-admin:latest  # 固定镜像版本（禁止使用latest）
+  gin-design-v1:
+    image: gin-design:latest  # 固定镜像版本（禁止使用latest）
     user: "1001:1001"        # 强制指定非root用户UID/GID（与Dockerfile中创建的nonroot用户一致）
     security_opt:
       - no-new-privileges:true  # 禁止提权
@@ -22,25 +22,25 @@ services:
         compress: "true"      # 启用压缩节省空间
         labels: "prod"        # 添加日志标签方便过滤
     volumes:
-      - /usr/src/dev/loan-admin/log/app:/app/logs:uid=1001,gid=1001,mode=0750
+      - /usr/src/dev/gin-design/log/app:/app/logs:uid=1001,gid=1001,mode=0750
     labels:
       - "traefik.enable=true"
       # 定义v1服务
-      - "traefik.http.services.loan-admin-v1.loadbalancer.server.port=9001"
+      - "traefik.http.services.gin-design-v1.loadbalancer.server.port=9001"
       # 健康检查
-      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.path=/health"
-      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.interval=10s"
-      - "traefik.http.services.loan-admin-v1.loadbalancer.healthcheck.timeout=3s"
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.timeout=3s"
     networks:
       - traefik_net
 
 # volumes:
-#   loan-admin-logs:  # 命名卷（Docker自动管理路径）
+#   gin-design-logs:  # 命名卷（Docker自动管理路径）
 #     driver: local
 #     driver_opts:
 #       type: "none"
 #       o: "bind,uid=1001,gid=1001,mode=0750"
-#       device: /usr/src/dev/loan-admin/log/app  # 宿主机实际路径（可自定义）
+#       device: /usr/src/dev/gin-design/log/app  # 宿主机实际路径（可自定义）
 
 networks:
   traefik_net:

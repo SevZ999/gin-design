@@ -1,6 +1,11 @@
 package controller
 
-import "loan-admin/internal/app/service"
+import (
+	"gin-design/internal/app/dto"
+	"gin-design/internal/app/service"
+
+	"github.com/gin-gonic/gin"
+)
 
 type UserController struct {
 	srv *service.UserService
@@ -10,4 +15,15 @@ func NewUserController(userService *service.UserService) *UserController {
 	return &UserController{
 		srv: userService,
 	}
+}
+
+func (c *UserController) GetUser(ctx *gin.Context) {
+	resp, err := c.srv.GetUser(dto.GetUserReq{Id: 200})
+	if err != nil {
+		ctx.JSON(200, dto.Error(
+			1,
+			err.Error(),
+		))
+	}
+	ctx.JSON(200, dto.Success(resp))
 }

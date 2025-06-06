@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"gin-design/internal/pkg/logger"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,10 @@ import (
 )
 
 // 修改函数签名接收*zap.Logger
-func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
+func LoggingMiddleware(logger *logger.ZapLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		requestID := c.GetString("request_id")
+		requestID := c.GetString("request-id")
 
 		c.Next()
 

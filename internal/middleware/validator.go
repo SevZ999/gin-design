@@ -2,7 +2,7 @@
 package middleware
 
 import (
-	"loan-admin/internal/pkg/errors"
+	"gin-design/internal/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

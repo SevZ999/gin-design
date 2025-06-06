@@ -2,7 +2,7 @@ package mq
 
 import (
 	"context"
-	"loan-admin/internal/config"
+	"gin-design/internal/config"
 	"testing"
 	"time"
 )

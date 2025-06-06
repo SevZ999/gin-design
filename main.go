@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"loan-admin/internal"
+	"gin-design/internal"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -33,10 +33,11 @@ func main() {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	app, err := internal.InitApp("dev")
+	app, clean, err := internal.InitApp("dev")
 	if err != nil {
 		panic(err)
 	}
+	defer clean()
 
 	app.Run()
 }

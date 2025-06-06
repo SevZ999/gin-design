@@ -2,7 +2,7 @@
 package logger
 
 import (
-	"loan-admin/internal/config"
+	"gin-design/internal/config"
 	"os"
 
 	"go.uber.org/zap"
@@ -10,11 +10,11 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type Logger struct {
-	*zap.Logger
+type ZapLogger struct {
+	logger *zap.Logger
 }
 
-func NewZapLogger(cfg *config.Config) (*Logger, error) {
+func NewZapLogger(cfg *config.Config) (*ZapLogger, error) {
 	var cores []zapcore.Core
 
 	encoderConfig := zap.NewProductionEncoderConfig()
@@ -27,7 +27,7 @@ func NewZapLogger(cfg *config.Config) (*Logger, error) {
 	encoderConfig.StacktraceKey = "stacktrace"
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
-	if cfg.Env == "dev" {
+	if cfg.Env == "debug" {
 		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 		consoleCore := zapcore.NewCore(
 			consoleEncoder,
@@ -86,7 +86,7 @@ func NewZapLogger(cfg *config.Config) (*Logger, error) {
 
 	zap.ReplaceGlobals(logger)
 
-	return &Logger{logger}, nil
+	return &ZapLogger{logger: logger}, nil
 }
 
 func getLogLevel(level string) zapcore.Level {
@@ -104,6 +104,18 @@ func getLogLevel(level string) zapcore.Level {
 	}
 }
 
-func Log() *zap.Logger {
-	return zap.L()
+func (l *ZapLogger) GetLogger() *zap.Logger {
+	return l.logger
+}
+
+func (l *ZapLogger) Error(msg string, fields ...zap.Field) {
+	l.logger.Error(msg, fields...)
+}
+
+func (l *ZapLogger) Info(msg string, fields ...zap.Field) {
+	l.logger.Info(msg, fields...)
+}
+
+func (l *ZapLogger) Warn(msg string, fields ...zap.Field) {
+	l.logger.Warn(msg, fields...)
 }

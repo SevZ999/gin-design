@@ -1,7 +1,7 @@
 package router
 
 import (
-	"loan-admin/internal/app/controller"
+	"gin-design/internal/app/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +17,4 @@ func NewShopRouter(ctrl *controller.ShopController) *ShopRouter {
 }
 
 func (r *ShopRouter) SetRoute(router *gin.RouterGroup) {
-	api := router.Group("/shop")
-	api.GET("", r.ctrl.GetShops)
 }

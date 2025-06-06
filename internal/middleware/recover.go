@@ -4,7 +4,7 @@ package middleware
 import (
 	"runtime/debug"
 
-	"loan-admin/internal/pkg/logger"
+	"gin-design/internal/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -14,7 +14,7 @@ func RecoveryMiddleware(logger *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				logger.Error(
+				zap.S().Error(
 					"Panic recovered",
 					zap.Any("error", err),
 					zap.String("stack", string(debug.Stack())),

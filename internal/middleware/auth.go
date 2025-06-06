@@ -2,8 +2,8 @@
 package middleware
 
 import (
-	"loan-admin/internal/config"
-	"loan-admin/internal/pkg/auth"
+	"gin-design/internal/config"
+	"gin-design/internal/pkg/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

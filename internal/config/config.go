@@ -103,6 +103,5 @@ func LoadConfig(env string) (*Config, error) {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
 
-	cfg.Env = env
 	return &cfg, nil
 }

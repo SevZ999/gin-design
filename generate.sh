@@ -6,11 +6,9 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# 将输入转换为首字母大写格式（如 user → User）
 MODULE_NAME=$(echo "$1" | sed 's/^\(.\)/\U\1/')
 MODULE_LOWER=$1
 
-# 定义要生成的文件结构
 declare -A FILES=(
     ["controller"]="package controller
 
@@ -31,10 +29,14 @@ type ${MODULE_NAME}Repo interface {
 
 type ${MODULE_NAME}Service struct {
 	repo ${MODULE_NAME}Repo
+	log  *logger.Logger  // 新增日志字段
 }
 
-func New${MODULE_NAME}Service(repo ${MODULE_NAME}Repo) *${MODULE_NAME}Service {
-	return &${MODULE_NAME}Service{repo: repo}
+func New${MODULE_NAME}Service(repo ${MODULE_NAME}Repo, log *logger.Logger) *${MODULE_NAME}Service {  // 新增log参数
+	return &${MODULE_NAME}Service{
+		repo: repo,
+		log:  log,  // 初始化日志字段
+	}
 }"
 
     ["repo"]="package repo
@@ -65,15 +67,10 @@ func (r *${MODULE_NAME}Router) SetRoute(router *gin.RouterGroup) {
 }"
 )
 
-# 创建目录并生成文件
 for dir in "${!FILES[@]}"; do
-    # 创建目录（如果不存在）
     mkdir -p "./internal/app/$dir"
-    
-    # 生成文件路径
     filename="./internal/app/$dir/${MODULE_LOWER}.go"
     
-    # 检查文件是否存在
     if [ -f "$filename" ]; then
         echo "文件已存在，跳过：$filename"
         continue
@@ -81,7 +78,7 @@ for dir in "${!FILES[@]}"; do
     
     echo "正在生成：$filename"
     
-    # 写入文件内容（自动格式化）
+    # 使用here document写入内容（自动处理缩进）
     cat > "$filename" <<EOF
 ${FILES[$dir]}
 EOF

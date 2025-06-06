@@ -3,7 +3,7 @@ package mq
 import (
 	"context"
 	"fmt"
-	"loan-admin/internal/config"
+	"gin-design/internal/config"
 	"log"
 	"os"
 	"strconv"

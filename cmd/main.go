@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"loan-admin/internal"
+	"gin-design/internal"
 	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -26,17 +25,18 @@ func main() {
 	}
 
 	// 加载 .env 文件（优先加载）
-	name, ok := os.LookupEnv(gin.EnvGinMode)
+	name, ok := os.LookupEnv("MODE")
+
 	if ok {
-		gin.SetMode(name)
+		app, clean, err := internal.InitApp(name)
+		if err != nil {
+			panic(err)
+		}
+		defer clean()
+
+		app.Run()
 	} else {
-		gin.SetMode(gin.DebugMode)
+		panic("MODE not found")
 	}
 
-	app, err := internal.InitApp("dev")
-	if err != nil {
-		panic(err)
-	}
-
-	app.Run()
 }

@@ -3,63 +3,50 @@
 package internal
 
 import (
-	"loan-admin/internal/app/controller"
-	"loan-admin/internal/app/data"
-	"loan-admin/internal/app/repo"
-	"loan-admin/internal/app/router"
-	"loan-admin/internal/app/service"
-	"loan-admin/internal/config"
-	"loan-admin/internal/db"
-	"loan-admin/internal/middleware"
-	"loan-admin/internal/pkg/logger"
+	"gin-design/internal/app/controller"
+	"gin-design/internal/app/data"
+	"gin-design/internal/app/repo"
+	"gin-design/internal/app/router"
+	"gin-design/internal/app/service"
+	"gin-design/internal/config"
+	"gin-design/internal/db"
+	"gin-design/internal/pkg/logger"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "loan-admin/docs"
+	"fmt"
+	_ "gin-design/docs"
 )
 
 type App struct {
-	Engine  *gin.Engine
-	routers []router.Router
+	srv *http.Server
 }
 
-func NewApp(routers []router.Router) *App {
+func NewApp(cfg *config.Config, handler *gin.Engine) *App {
 	return &App{
-		Engine:  gin.Default(),
-		routers: routers,
+		srv: &http.Server{
+			Handler: handler,
+			Addr:    fmt.Sprint(":", cfg.HTTP.Port),
+		},
 	}
 }
 
 func (a *App) Run() {
-
-	api := a.Engine.Group("api")
-
-	api.Use(middleware.CORS())
-
-	a.SetRoute(api)
-
-	a.Engine.GET("/health", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// pprof.Register(a.Engine, "/api/pprof")
-
-	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	a.Engine.Run(":9001")
+	if err := a.srv.ListenAndServe(); err != nil {
+		panic(err)
+	}
 }
 
-func InitApp(mode string) (*App, error) {
+func InitApp(mode string) (*App, func(), error) {
 
 	wire.Build(
 		config.LoadConfig,
 
 		logger.NewZapLogger,
+		wire.Bind(new(logger.Logger), new(*logger.ZapLogger)),
+
 		db.NewGormDB,
 
 		data.NewData,
@@ -68,13 +55,8 @@ func InitApp(mode string) (*App, error) {
 		controller.ControllerProviderSet,
 		router.RouterProviderSet,
 		router.NewRouters,
+		NewEngine,
 		NewApp,
 	)
-	return &App{}, nil
-}
-
-func (a *App) SetRoute(api *gin.RouterGroup) {
-	for _, r := range a.routers {
-		r.SetRoute(api)
-	}
+	return nil, nil, nil
 }

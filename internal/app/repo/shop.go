@@ -1,6 +1,6 @@
 package repo
 
-import "loan-admin/internal/app/data"
+import "gin-design/internal/app/data"
 
 type ShopRepo struct {
 	Db *data.Data

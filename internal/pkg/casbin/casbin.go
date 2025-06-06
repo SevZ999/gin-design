@@ -1,6 +1,6 @@
 package casbin
 
-import "loan-admin/internal/config"
+import "gin-design/internal/config"
 
 func LoadCasin(cfg *config.Config) {
 

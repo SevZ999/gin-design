@@ -5,7 +5,7 @@
 package mock
 
 import (
-	model "loan-admin/internal/app/model"
+	model "gin-design/internal/app/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

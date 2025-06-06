@@ -3,8 +3,8 @@ package consul
 
 import (
 	"fmt"
-	"loan-admin/internal/config"
-	"loan-admin/internal/pkg/logger"
+	"gin-design/internal/config"
+	"gin-design/internal/pkg/logger"
 
 	"github.com/hashicorp/consul/api"
 	"go.uber.org/zap"
@@ -33,7 +33,7 @@ func RegisterService(cfg *config.Config, logger *logger.Logger) {
 
 	client, err := NewConsulClient(cfg)
 	if err != nil {
-		logger.Error("Failed to create consul client", zap.Error(err))
+		zap.S().Error("Failed to create consul client", zap.Error(err))
 		return
 	}
 
@@ -51,7 +51,7 @@ func RegisterService(cfg *config.Config, logger *logger.Logger) {
 	}
 
 	if err := client.Agent().ServiceRegister(registration); err != nil {
-		logger.Error("Failed to register service with consul", zap.Error(err))
+		zap.S().Error("Failed to register service with consul", zap.Error(err))
 	}
 }
 
@@ -62,11 +62,11 @@ func DeregisterService(cfg *config.Config, logger *logger.Logger) {
 
 	client, err := NewConsulClient(cfg)
 	if err != nil {
-		logger.Error("Failed to create consul client", zap.Error(err))
+		zap.S().Error("Failed to create consul client", zap.Error(err))
 		return
 	}
 
 	if err := client.Agent().ServiceDeregister(cfg.Consul.ServiceID); err != nil {
-		logger.Error("Failed to deregister service from consul", zap.Error(err))
+		zap.S().Error("Failed to deregister service from consul", zap.Error(err))
 	}
 }

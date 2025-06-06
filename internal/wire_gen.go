@@ -7,96 +7,72 @@
 package internal
 
 import (
+	"fmt"
+	"gin-design/internal/app/controller"
+	"gin-design/internal/app/data"
+	"gin-design/internal/app/repo"
+	"gin-design/internal/app/router"
+	"gin-design/internal/app/service"
+	"gin-design/internal/config"
+	"gin-design/internal/db"
+	"gin-design/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
-	"loan-admin/internal/app/controller"
-	"loan-admin/internal/app/data"
-	"loan-admin/internal/app/repo"
-	"loan-admin/internal/app/router"
-	"loan-admin/internal/app/service"
-	"loan-admin/internal/config"
-	"loan-admin/internal/db"
-	"loan-admin/internal/middleware"
-	"loan-admin/internal/pkg/logger"
+	"net/http"
 )
 
 import (
-	_ "loan-admin/docs"
+	_ "gin-design/docs"
 )
 
 // Injectors from wire.go:
 
-func InitApp(mode string) (*App, error) {
+func InitApp(mode string) (*App, func(), error) {
 	configConfig, err := config.LoadConfig(mode)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	loggerLogger, err := logger.NewZapLogger(configConfig)
+	zapLogger, err := logger.NewZapLogger(configConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	gormDB, err := db.NewGormDB(configConfig, loggerLogger)
+	gormDB, cleanup, err := db.NewGormDB(configConfig, zapLogger)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	dataData := data.NewData(gormDB)
 	userRepo := repo.NewUserRepo(dataData)
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, zapLogger)
 	userController := controller.NewUserController(userService)
 	userRouter := router.NewUserRouter(userController)
-	acessRepo := repo.NewAccessRepo(dataData)
-	accessService := service.NewAccessService(acessRepo)
-	accessController := controller.NewAccessController(accessService)
-	accessRouter := router.NewAccessRouter(accessController)
-	channelRepo := repo.NewChannelRepo(dataData)
-	channelService := service.NewChannelService(channelRepo)
-	channelController := controller.NewChannelController(channelService)
-	channelRouter := router.NewChannelRouter(channelController)
 	shopRepo := repo.NewShopRepo(dataData)
-	shopService := service.NewShopService(shopRepo)
+	shopService := service.NewShopService(shopRepo, zapLogger)
 	shopController := controller.NewShopController(shopService)
 	shopRouter := router.NewShopRouter(shopController)
-	v := router.NewRouters(userRouter, accessRouter, channelRouter, shopRouter)
-	app := NewApp(v)
-	return app, nil
+	v := router.NewRouters(userRouter, shopRouter)
+	engine := NewEngine(configConfig, zapLogger, v)
+	app := NewApp(configConfig, engine)
+	return app, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
 
 type App struct {
-	Engine  *gin.Engine
-	routers []router.Router
+	srv *http.Server
 }
 
-func NewApp(routers []router.Router) *App {
+func NewApp(cfg *config.Config, handler *gin.Engine) *App {
 	return &App{
-		Engine:  gin.Default(),
-		routers: routers,
+		srv: &http.Server{
+			Handler: handler,
+			Addr:    fmt.Sprint(":", cfg.HTTP.Port),
+		},
 	}
 }
 
 func (a *App) Run() {
-
-	api := a.Engine.Group("api")
-
-	api.Use(middleware.CORS())
-
-	a.SetRoute(api)
-
-	a.Engine.GET("/health", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	a.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	a.Engine.Run(":9001")
-}
-
-func (a *App) SetRoute(api *gin.RouterGroup) {
-	for _, r := range a.routers {
-		r.SetRoute(api)
+	if err := a.srv.ListenAndServe(); err != nil {
+		panic(err)
 	}
 }

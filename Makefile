@@ -9,7 +9,7 @@ git:
 	@echo "Commit completed!"
 
 build:
-	docker build -t loan-admin .
+	docker build -t gin-design .
 
 start:
 	docker-compose --compatibility up -d

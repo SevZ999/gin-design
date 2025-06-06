@@ -1,8 +1,8 @@
 package service
 
 import (
-	"loan-admin/internal/app/dto"
-	"loan-admin/internal/app/mock"
+	"gin-design/internal/app/dto"
+	"gin-design/internal/app/mock"
 	"testing"
 
 	gomock "github.com/golang/mock/gomock"
