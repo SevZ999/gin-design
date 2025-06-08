@@ -1,6 +1,6 @@
 services:
   gin-design-v1:
-    image: gin-design:latest  # 固定镜像版本（禁止使用latest）
+    image: crpi-nmbc0yqbbslptbxi.cn-shanghai.personal.cr.aliyuncs.com/sevz98/gin-design:v1.0.1 # 固定镜像版本（禁止使用latest）
     user: "1001:1001"        # 强制指定非root用户UID/GID（与Dockerfile中创建的nonroot用户一致）
     security_opt:
       - no-new-privileges:true  # 禁止提权
@@ -9,6 +9,8 @@ services:
     read_only: true            # 文件系统只读
     # tmpfs:                     # 允许临时目录写入
     #   - /tmp:uid=1001,gid=1001,mode=1700  # 限制/tmp目录权限
+    environment:
+      - MODE=dev
     deploy:
       resources:
         limits:

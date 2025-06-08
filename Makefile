@@ -9,7 +9,15 @@ git:
 	@echo "Commit completed!"
 
 build:
-	docker build -t gin-design .
+	@echo "Building..."
+	@read -p "Enter build version: " version; \
+	docker build -t crpi-nmbc0yqbbslptbxi.cn-shanghai.personal.cr.aliyuncs.com/sevz98/gin-design:v"$$version" .
+push:
+	@read -p "Enter build version: " version; \
+	docker push crpi-nmbc0yqbbslptbxi.cn-shanghai.personal.cr.aliyuncs.com/sevz98/gin-design:v"$$version"
+	@echo "Push completed!"
+
+
 
 start:
 	docker-compose --compatibility up -d

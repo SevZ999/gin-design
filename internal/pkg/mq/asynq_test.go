@@ -3,6 +3,8 @@ package mq
 import (
 	"gin-design/internal/config"
 	"testing"
+
+	"github.com/hibiken/asynq"
 )
 
 func TestAsynqSendMessage(t *testing.T) {
@@ -13,7 +15,11 @@ func TestAsynqSendMessage(t *testing.T) {
 			DB:       0,
 		},
 	})
-	err := as.SendMessage("test-01", "test1")
+	err := as.SendMessage(
+		"test-02",
+		"test1",
+		asynq.Queue("test-01"),
+	)
 	if err != nil {
 		t.Error(err)
 	}

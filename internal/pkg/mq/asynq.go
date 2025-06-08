@@ -26,7 +26,7 @@ func NewAsynqClient(cfg *config.Config) *Asynq {
 	}
 }
 
-func (a *Asynq) SendMessage(name string, payload any) error {
+func (a *Asynq) SendMessage(name string, payload any, opts ...asynq.Option) error {
 	py, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (a *Asynq) SendMessage(name string, payload any) error {
 
 	task := asynq.NewTask(name, py)
 
-	_, err = a.client.Enqueue(task)
+	_, err = a.client.Enqueue(task, opts...)
 
 	return err
 }

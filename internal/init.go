@@ -14,6 +14,18 @@ func NewEngine(cfg *config.Config, logger *logger.ZapLogger, routers []router.Ro
 
 	r := gin.Default()
 
+	r.GET("/healthz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	r.GET("/readyz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
 	r.Use(
 		middleware.CORS(),
 		middleware.RequestId(),
