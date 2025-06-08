@@ -61,3 +61,9 @@ del:
 	rm -f ./internal/app/repo/$$MODULE.go; \
 	rm -f ./internal/app/router/$$MODULE.go; \
 	echo "删除完成！"
+
+dev:
+	@echo "正在准备上传到阿里云..."
+	@read -p "请输入版本号: " version; \
+	curl --header "Content-Type: application/json" --request POST \
+	--data "{\"VERSION\":\"v$$version\"}" http://flow-openapi.aliyun.com/pipeline/webhook/NBl702N91jXZ4jyNkRtW
