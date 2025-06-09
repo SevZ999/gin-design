@@ -1,41 +1,49 @@
-# scripts/docker-compose.prod.yml
-version: '3.8'
-
 services:
-  app:
-    build: .
+  gin-design-v1:
+    image: crpi-nmbc0yqbbslptbxi.cn-shanghai.personal.cr.aliyuncs.com/sevz98/gin-design:v1.0.1 # 固定镜像版本（禁止使用latest）
+    user: "1001:1001"        # 强制指定非root用户UID/GID（与Dockerfile中创建的nonroot用户一致）
+    security_opt:
+      - no-new-privileges:true  # 禁止提权
+    cap_drop:                  # 删除所有特权能力
+      - ALL
+    read_only: true            # 文件系统只读
+    # tmpfs:                     # 允许临时目录写入
+    #   - /tmp:uid=1001,gid=1001,mode=1700  # 限制/tmp目录权限
     environment:
-      - ENV=prod
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASSWORD=secret
-      - REDIS_ADDR=redis:6379
-      - JWT_SECRET=prod-secret-key
-      - AES_ENCRYPTION_KEY=prod-aes-key-1234567890123456
-      - CONSUL_ADDR=consul
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-      - redis
-      - consul
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: prod_db
+      - MODE=dev
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:                   # 🔥 日志安全配置
+      driver: json-file
+      options:
+        max-size: "10m"       # 单个日志文件最大10MB
+        max-file: "5"         # 最多保留5个历史日志
+        compress: "true"      # 启用压缩节省空间
+        labels: "prod"        # 添加日志标签方便过滤
     volumes:
-      - mysql_data:/var/lib/mysql
+      - /usr/src/dev/gin-design/log/app:/app/logs:uid=1001,gid=1001,mode=0750
+    labels:
+      - "traefik.enable=true"
+      # 定义v1服务
+      - "traefik.http.services.gin-design-v1.loadbalancer.server.port=9001"
+      # 健康检查
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.gin-design-v1.loadbalancer.healthcheck.timeout=3s"
+    networks:
+      - traefik_net
 
-  redis:
-    image: redis:6.2
-    command: redis-server --requirepass secret
+# volumes:
+#   gin-design-logs:  # 命名卷（Docker自动管理路径）
+#     driver: local
+#     driver_opts:
+#       type: "none"
+#       o: "bind,uid=1001,gid=1001,mode=0750"
+#       device: /usr/src/dev/gin-design/log/app  # 宿主机实际路径（可自定义）
 
-  consul:
-    image: consul:1.15
-    ports:
-      - "8500:8500"
-
-volumes:
-  mysql_data:
+networks:
+  traefik_net:
+    external: true

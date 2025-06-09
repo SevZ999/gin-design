@@ -7,6 +7,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"gin-design/internal/app/controller"
 	"gin-design/internal/app/data"
@@ -17,7 +18,12 @@ import (
 	"gin-design/internal/db"
 	"gin-design/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 import (
@@ -72,7 +78,26 @@ func NewApp(cfg *config.Config, handler *gin.Engine) *App {
 }
 
 func (a *App) Run() {
-	if err := a.srv.ListenAndServe(); err != nil {
-		panic(err)
+	go func() {
+		log.Printf("服务器启动，监听端口: %s", a.srv.Addr)
+		if err := a.srv.ListenAndServe(); err != nil {
+
+			if err != http.ErrServerClosed {
+				log.Fatalf("服务器意外关闭或启动失败: %v", err)
+			}
+
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, os.Interrupt)
+	<-quit
+	log.Println("开始优雅关闭...")
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+
+	if err := a.srv.Shutdown(ctx); err != nil {
+		log.Fatalf("强制关闭失败: %v", err)
 	}
+	log.Println("程序正常退出")
 }

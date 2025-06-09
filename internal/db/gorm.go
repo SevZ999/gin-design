@@ -80,6 +80,7 @@ func NewGormDB(cfg *config.Config, log *logger1.ZapLogger) (*gorm.DB, func(), er
 	sqlDB.SetConnMaxLifetime(cfg.Database.Master.ConnMaxLifetime)
 
 	cleanUp := func() {
+		log.Info("shutting down database connection pool...")
 		if err := sqlDB.Close(); err != nil {
 			fmt.Println(err)
 		}
