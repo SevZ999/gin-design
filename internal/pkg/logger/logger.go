@@ -1,8 +1,13 @@
 package logger
 
-import "go.uber.org/zap"
+import (
+	"context"
+
+	"go.uber.org/zap"
+)
 
 type Logger interface {
-	Error(string, ...zap.Field)
-	Info(string, ...zap.Field)
+	Error(context.Context, string, ...zap.Field)
+	Info(context.Context, string, ...zap.Field)
+	Warn(context.Context, string, ...zap.Field)
 }

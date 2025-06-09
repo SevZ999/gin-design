@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"gin-design/internal/app/data"
 	"gin-design/internal/app/dto"
 	"gin-design/internal/app/model"
 	"gin-design/internal/pkg/logger"
@@ -9,7 +11,7 @@ import (
 )
 
 type UserRepo interface {
-	GetUser(int) (model.User, error)
+	GetUser(context.Context, int) (model.User, error)
 }
 
 type UserService struct {
@@ -17,16 +19,30 @@ type UserService struct {
 	log  logger.Logger
 }
 
-func (u *UserService) GetUser(req dto.GetUserReq) (dto.GetUserResp, error) {
-	user, err := u.repo.GetUser(200)
+func (u *UserService) GetUser(ctx context.Context, req dto.GetUserReq) (dto.GetUserResp, error) {
+
+	var resp dto.GetUserResp
+
+	tx := data.NewTransactionManager(ctx)
+
+	err := tx.ExecuteTransaction(func(txCtx context.Context) error {
+		user, err := u.repo.GetUser(txCtx, req.Id)
+		if err != nil {
+			return err
+		}
+		resp = dto.GetUserResp{
+			Id:   user.Id,
+			Name: user.Name,
+		}
+		return nil
+	})
+
 	if err != nil {
-		u.log.Error("get user error", zap.Error(err))
+		u.log.Error(ctx, "get user error", zap.Error(err))
 		return dto.GetUserResp{}, err
 	}
-	return dto.GetUserResp{
-		Id:   user.Id,
-		Name: user.Name,
-	}, nil
+
+	return resp, nil
 }
 
 func NewUserService(repo UserRepo, log logger.Logger) *UserService {

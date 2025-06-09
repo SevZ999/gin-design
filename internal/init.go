@@ -23,6 +23,7 @@ func NewEngine(cfg *config.Config, logger *logger.ZapLogger, routers []router.Ro
 
 	//全局中间件
 	r.Use(
+		middleware.TimeoutMiddleware(),
 		middleware.CORS(),
 		middleware.RequestId(),
 		middleware.LoggingMiddleware(logger),

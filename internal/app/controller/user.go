@@ -18,7 +18,8 @@ func NewUserController(userService *service.UserService) *UserController {
 }
 
 func (c *UserController) GetUser(ctx *gin.Context) {
-	resp, err := c.srv.GetUser(dto.GetUserReq{Id: 200})
+
+	resp, err := c.srv.GetUser(GetCtx(ctx), dto.GetUserReq{Id: 200})
 	if err != nil {
 		ctx.JSON(200, dto.Error(
 			1,

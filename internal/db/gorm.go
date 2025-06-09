@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gin-design/internal/config"
 	logger1 "gin-design/internal/pkg/logger"
+	"gin-design/utils"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -80,7 +81,7 @@ func NewGormDB(cfg *config.Config, log *logger1.ZapLogger) (*gorm.DB, func(), er
 	sqlDB.SetConnMaxLifetime(cfg.Database.Master.ConnMaxLifetime)
 
 	cleanUp := func() {
-		log.Info("shutting down database connection pool...")
+		log.Info(context.Background(), "shutting down database connection pool...")
 		if err := sqlDB.Close(); err != nil {
 			fmt.Println(err)
 		}
@@ -125,6 +126,7 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		zap.String("sql", sql),
 		zap.String("time", string(rune(elapsed))),
 		zap.Int64("rows", rows),
+		zap.String("request-id", utils.GetRequestId(ctx)),
 	}
 
 	// Gorm 错误

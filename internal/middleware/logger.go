@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"context"
 	"gin-design/internal/pkg/logger"
 	"time"
 
@@ -35,11 +36,11 @@ func LoggingMiddleware(logger *logger.ZapLogger) gin.HandlerFunc {
 		}
 
 		if status >= 500 {
-			logger.Error("Internal server error", fields...)
+			logger.Error(context.TODO(), "Internal server error", fields...)
 		} else if status >= 400 {
-			logger.Warn("Client error", fields...)
+			logger.Warn(context.TODO(), "Client error", fields...)
 		} else {
-			logger.Info("Request completed", fields...)
+			logger.Info(context.TODO(), "Request completed", fields...)
 		}
 	}
 }

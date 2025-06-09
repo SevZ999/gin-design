@@ -6,16 +6,20 @@ import (
 	"gorm.io/gorm"
 )
 
-var globalDb *gorm.DB
+// 定义自定义键类型
+type txKeyType struct{}
+
+var (
+	txKey    txKeyType
+	globalDb *gorm.DB
+)
 
 type Data struct {
 	db *gorm.DB
 }
 
 func NewData(db *gorm.DB) *Data {
-
 	globalDb = db
-
 	return &Data{
 		db: db,
 	}
@@ -26,13 +30,11 @@ func GetDB() *gorm.DB {
 }
 
 func (d *Data) WithContext(ctx context.Context) *gorm.DB {
-	if ctx == nil {
-		return d.db
+	//断言是否有事务传入
+	tx, ok := ctx.Value(txKey).(*gorm.DB)
+	if ok {
+		return tx.WithContext(ctx)
+	} else {
+		return d.db.WithContext(ctx)
 	}
-
-	tx := ctx.Value("tx")
-	if tx != nil {
-		return tx.(*gorm.DB)
-	}
-	return d.db
 }
