@@ -67,3 +67,8 @@ dev:
 	@read -p "请输入版本号: " version; \
 	curl --header "Content-Type: application/json" --request POST \
 	--data "{\"VERSION\":\"v$$version\"}" http://flow-openapi.aliyun.com/pipeline/webhook/NBl702N91jXZ4jyNkRtW
+
+check:
+	@echo "切换新分支..."
+	@read -p "请输入版本号: " version; \
+	git checkout -b feature/"$$version"
