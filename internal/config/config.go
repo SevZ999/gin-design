@@ -85,7 +85,7 @@ type Crypto struct {
 }
 
 func LoadConfig(env string) (*Config, error) {
-	viper.SetConfigName(fmt.Sprintf("config.%s", env))
+	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 
 	viper.AddConfigPath("./config")
