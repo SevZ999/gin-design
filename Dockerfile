@@ -21,12 +21,11 @@ RUN addgroup -g 1001 nonroot && \
 
 WORKDIR /app
 
-# 复制二进制文件和配置文件（生产环境专用）
+# 复制二进制文件
 COPY --from=builder --chown=nonroot:nonroot /app/main .
-COPY --from=builder --chown=nonroot:nonroot /app/config/config.dev.yaml ./config/
 
-# 确保配置文件权限安全
-RUN chmod 640 ./config/config.dev.yaml
+# 创建配置目录（不复制配置文件）
+RUN mkdir -p ./config && chmod 750 ./config
 
 # 设置容器用户和启动命令
 USER nonroot:nonroot
