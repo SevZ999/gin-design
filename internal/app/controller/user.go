@@ -27,5 +27,5 @@ func (c *UserController) GetUser(ctx *gin.Context) {
 	// 	))
 	// }
 	// ctx.JSON(200, dto.Success(resp))
-	ctx.JSON(200, dto.Success("this is canary"))
+	ctx.JSON(200, dto.Success("this is gray"))
 }
