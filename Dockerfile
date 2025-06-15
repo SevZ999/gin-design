@@ -27,6 +27,11 @@ COPY --from=builder --chown=nonroot:nonroot /app/main .
 # 创建配置目录（不复制配置文件）
 RUN mkdir -p ./config && chmod 750 ./config
 
+# 创建日志目录并设置权限
+RUN mkdir -p ./log && \
+    chown nonroot:nonroot ./log && \
+    chmod 755 ./log
+
 # 设置容器用户和启动命令
 USER nonroot:nonroot
 CMD ["./main"]

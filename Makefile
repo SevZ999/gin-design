@@ -72,3 +72,7 @@ check:
 	@echo "切换新分支..."
 	@read -p "请输入版本号: " version; \
 	git checkout -b feature/"$$version"
+
+ops:
+	@read -p "please enter commit description: " message; \
+	git commit -a -m /"$$message"
