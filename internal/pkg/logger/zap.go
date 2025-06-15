@@ -40,7 +40,7 @@ func NewZapLogger(cfg *config.Config) (*ZapLogger, error) {
 		enc.AppendString(caller.TrimmedPath())
 	}
 
-	if cfg.Env == "debug" {
+	if cfg.Env == "prod" {
 		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 		consoleCore := zapcore.NewCore(
 			consoleEncoder,
@@ -50,11 +50,11 @@ func NewZapLogger(cfg *config.Config) (*ZapLogger, error) {
 		cores = append(cores, consoleCore)
 	}
 
-	if cfg.Env == "prod" {
+	if cfg.Env == "debug" {
 		jsonEncoder := zapcore.NewJSONEncoder(encoderConfig)
 
 		hook := lumberjack.Logger{
-			Filename:   "./log/app/app.log",
+			Filename:   "./log/app.log",
 			MaxSize:    cfg.Log.MaxSize,
 			MaxBackups: cfg.Log.MaxBackups,
 			MaxAge:     cfg.Log.MaxAge,
