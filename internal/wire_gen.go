@@ -56,7 +56,7 @@ func InitApp(mode string) (*App, func(), error) {
 	shopRouter := router.NewShopRouter(shopController)
 	v := router.NewRouters(userRouter, shopRouter)
 	engine := NewEngine(configConfig, zapLogger, v)
-	app := NewApp(configConfig, engine)
+	app := NewApp(configConfig, engine, zapLogger)
 	return app, func() {
 		cleanup()
 	}, nil
@@ -65,21 +65,24 @@ func InitApp(mode string) (*App, func(), error) {
 // wire.go:
 
 type App struct {
-	srv *http.Server
+	srv    *http.Server
+	logger *logger.ZapLogger
 }
 
-func NewApp(cfg *config.Config, handler *gin.Engine) *App {
+func NewApp(cfg *config.Config, handler *gin.Engine, logger2 *logger.ZapLogger) *App {
 	return &App{
 		srv: &http.Server{
 			Handler: handler,
 			Addr:    fmt.Sprint("0.0.0.0:", cfg.HTTP.Port),
 		},
+		logger: logger2,
 	}
 }
 
 func (a *App) Run() {
 	go func() {
-		log.Printf("server started: %s", a.srv.Addr)
+		msg := fmt.Sprintf("server started: %s", a.srv.Addr)
+		a.logger.Info(context.Background(), msg)
 		if err := a.srv.ListenAndServe(); err != nil {
 
 			if err != http.ErrServerClosed {
@@ -92,7 +95,8 @@ func (a *App) Run() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, os.Interrupt)
 	<-quit
-	log.Println("shutting down server...")
+
+	a.logger.Info(context.Background(), "shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 

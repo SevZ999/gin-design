@@ -27,21 +27,24 @@ import (
 )
 
 type App struct {
-	srv *http.Server
+	srv    *http.Server
+	logger *logger.ZapLogger
 }
 
-func NewApp(cfg *config.Config, handler *gin.Engine) *App {
+func NewApp(cfg *config.Config, handler *gin.Engine, logger *logger.ZapLogger) *App {
 	return &App{
 		srv: &http.Server{
 			Handler: handler,
 			Addr:    fmt.Sprint("0.0.0.0:", cfg.HTTP.Port),
 		},
+		logger: logger,
 	}
 }
 
 func (a *App) Run() {
 	go func() {
-		log.Printf("server started: %s", a.srv.Addr)
+		msg := fmt.Sprintf("server started: %s", a.srv.Addr)
+		a.logger.Info(context.Background(), msg)
 		if err := a.srv.ListenAndServe(); err != nil {
 			// 仅当错误不是 http.ErrServerClosed 时触发 panic
 			if err != http.ErrServerClosed {
@@ -56,7 +59,7 @@ func (a *App) Run() {
 	signal.Notify(quit, syscall.SIGTERM, os.Interrupt)
 	<-quit
 
-	log.Println("shutting down server...")
+	a.logger.Info(context.Background(), "shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
