@@ -34,7 +34,7 @@ func NewApp(cfg *config.Config, handler *gin.Engine) *App {
 	return &App{
 		srv: &http.Server{
 			Handler: handler,
-			Addr:    fmt.Sprint(":", cfg.HTTP.Port),
+			Addr:    fmt.Sprint("0.0.0.0:", cfg.HTTP.Port),
 		},
 	}
 }

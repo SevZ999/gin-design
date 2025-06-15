@@ -72,14 +72,14 @@ func NewApp(cfg *config.Config, handler *gin.Engine) *App {
 	return &App{
 		srv: &http.Server{
 			Handler: handler,
-			Addr:    fmt.Sprint(":", cfg.HTTP.Port),
+			Addr:    fmt.Sprint("0.0.0.0:", cfg.HTTP.Port),
 		},
 	}
 }
 
 func (a *App) Run() {
 	go func() {
-		log.Printf("服务器启动，监听端口: %s", a.srv.Addr)
+		log.Printf("server started: %s", a.srv.Addr)
 		if err := a.srv.ListenAndServe(); err != nil {
 
 			if err != http.ErrServerClosed {
@@ -92,12 +92,12 @@ func (a *App) Run() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, os.Interrupt)
 	<-quit
-	log.Println("开始优雅关闭...")
+	log.Println("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
 	if err := a.srv.Shutdown(ctx); err != nil {
-		log.Fatalf("强制关闭失败: %v", err)
+		log.Fatalf("server close error: %v", err)
 	}
-	log.Println("程序正常退出")
+	log.Println("server stopped")
 }
