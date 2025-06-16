@@ -8,6 +8,23 @@ import (
 	"github.com/hibiken/asynq"
 )
 
+const (
+	AdsConclusion = "conclusion"
+	AdsAttribute  = "attribute"
+	AdsConversion = "conversion"
+)
+
+var HashQueueMap = map[int]string{
+	0: "q1",
+	1: "q2",
+	2: "q3",
+	3: "q4",
+	4: "q5",
+	5: "q6",
+	6: "q7",
+	7: "q8",
+}
+
 type Asynq struct {
 	client *asynq.Client
 }
