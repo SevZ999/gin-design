@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"gin-design/internal"
+	"gin-design/internal/pkg/logger"
 	"os"
 )
 
@@ -23,7 +25,7 @@ func main() {
 
 	app, clean, err := internal.InitApp(name)
 	if err != nil {
-		panic(err)
+		logger.GetLogger().Fatal(context.TODO(), err.Error())
 	}
 	defer clean()
 

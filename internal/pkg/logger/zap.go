@@ -12,9 +12,11 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type ctxKey string
+// type ctxKey string
 
-const requestIDKey ctxKey = "request-id"
+// const requestIDKey ctxKey = "request-id"
+
+var zapLogger *ZapLogger
 
 type ZapLogger struct {
 	logger *zap.Logger
@@ -99,7 +101,9 @@ func NewZapLogger(cfg *config.Config) (*ZapLogger, error) {
 
 	zap.ReplaceGlobals(logger)
 
-	return &ZapLogger{logger: logger}, nil
+	zapLogger = &ZapLogger{logger: logger}
+
+	return zapLogger, nil
 }
 
 func getLogLevel(level string) zapcore.Level {
@@ -119,6 +123,10 @@ func getLogLevel(level string) zapcore.Level {
 
 func (l *ZapLogger) GetLogger() *zap.Logger {
 	return l.logger
+}
+
+func GetLogger() *ZapLogger {
+	return zapLogger
 }
 
 func (l *ZapLogger) Error(ctx context.Context, msg string, fields ...zap.Field) {
@@ -147,4 +155,13 @@ func (l *ZapLogger) Warn(ctx context.Context, msg string, fields ...zap.Field) {
 	}
 
 	l.logger.Warn(msg, fields...)
+}
+
+func (l *ZapLogger) Fatal(ctx context.Context, msg string, fields ...zap.Field) {
+	// 提取 RequestID（如果有）
+	if requestID, ok := ctx.Value(gin.ContextRequestKey).(string); ok {
+		fields = append(fields, zap.String("requestID", requestID))
+	}
+
+	l.logger.Fatal(msg, fields...)
 }
